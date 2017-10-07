@@ -14,15 +14,6 @@ public class NeuronSystem {
     private double rating;
 
 
-//    private double[] originalInput;
-//    private double[] expectationOutput;
-//    public void setOriginalInput(double[] originalInput) {
-//        this.originalInput = originalInput;
-//    }
-//    public void setExpectationOutput(double[] expectationOutput) {
-//        this.expectationOutput = expectationOutput;
-//    }
-
     public NeuronSystem(int inputCount, int[] hiddenCount, int outputCount, double rating) {
         this.inputCount = inputCount;
         this.hiddenLayerCount = hiddenCount.length;
@@ -33,19 +24,29 @@ public class NeuronSystem {
     }
 
     public void train(double[] input, double[] output) {
-        for (int i = 0; i < input.length; i++) {
-            System.out.print("input " + i + " : " + input[i]);
-        }
-        System.out.println();
-        for (int i = 0; i < output.length; i++) {
-            System.out.print("target " + i + " : " + output[i]);
-        }
-        System.out.println();
+//        for (int i = 0; i < input.length; i++) {
+//            System.out.print("input " + i + " : " + input[i] + "; ");
+//        }
+//        System.out.println();
+//        for (int i = 0; i < output.length; i++) {
+//            System.out.print("target " + i + " : " + output[i] + "; ");
+//        }
+//        System.out.println();
         forward(input);
+//        for (int i = 0; i < outputCount; i++) {
+//            System.out.print("system " + i + " : " + outputNodes[i].getForwardOutputValue() + "; ");
+//        }
+//        System.out.println();
+        double errorSum = 0;
         for (int i = 0; i < outputCount; i++) {
-            System.out.print("system " + i + " : " + outputNodes[i].getForwardOutputValue());
+            double error = outputNodes[i].getForwardOutputValue() - output[i];
+            errorSum += error;
+            System.out.printf("error index %d %10.7f ;", i, error);
         }
         System.out.println();
+        if (outputCount > 1) {
+            System.out.println("average error " + (errorSum / outputCount));
+        }
         backward(output);
         updateWeights();
     }
@@ -149,7 +150,7 @@ public class NeuronSystem {
         }
     }
 
-    public void reset() {
+    private void reset() {
         inputNodes = new NeuronNode[inputCount];
         for (int i = 0; i < inputCount; i++) {
             inputNodes[i] = new NeuronNode(NeuronNode.NODE_TYPE.INPUT);
@@ -160,23 +161,53 @@ public class NeuronSystem {
             hiddenNodes[i] = new NeuronNode[hiddenCount[i]];
             biasArray[i] = new double[hiddenCount[i]];
             for (int j = 0; j < hiddenCount[i]; j++) {
+                biasArray[i][j] = (Math.random() % 0.02) - 0.01;
+            }
+            for (int j = 0; j < hiddenCount[i]; j++) {
                 hiddenNodes[i][j] = new NeuronNode(NeuronNode.NODE_TYPE.HIDDEN);
             }
         }
         outputNodes = new NeuronNode[outputCount];
         biasArray[hiddenLayerCount] = new double[outputCount];
         for (int i = 0; i < outputCount; i++) {
+            biasArray[hiddenLayerCount][i] = (Math.random() % 0.02) - 0.01;
+        }
+        for (int i = 0; i < outputCount; i++) {
             outputNodes[i] = new NeuronNode(NeuronNode.NODE_TYPE.OUTPUT);
         }
 
         weightArray = new double[hiddenLayerCount + 1][][];
         weightArray[0] = new double[inputCount][hiddenCount[0]];
+        for (int i = 0; i < inputCount; i++) {
+            for (int j = 0; j < hiddenCount[0]; j++) {
+                weightArray[0][i][j] = (Math.random() % 0.02) - 0.01;
+            }
+        }
         for (int i = 1; i < hiddenLayerCount; i++) {
             weightArray[i] = new double[hiddenCount[i - 1]][hiddenCount[i]];
+            for (int j = 0; j < hiddenCount[i - 1]; j++) {
+                for (int k = 0; k < hiddenCount[i]; k++) {
+                    weightArray[i][j][k] = (Math.random() % 0.02) - 0.01;
+                }
+            }
         }
         weightArray[hiddenLayerCount] = new double[hiddenCount[hiddenLayerCount - 1]][outputCount];
+        for (int i = 0; i < hiddenCount[hiddenLayerCount - 1]; i++) {
+            for (int j = 0; j < outputCount; j++) {
+                weightArray[hiddenLayerCount][i][j] = (Math.random() % 0.02) - 0.01;
+            }
+        }
 
     }
 
 
+
+    public double[] predict(double[] input) {
+        forward(input);
+        double[] result = new double[outputCount];
+        for (int i = 0; i < outputCount; i++) {
+            result[i] = outputNodes[i].getForwardOutputValue();
+        }
+        return result;
+    }
 }

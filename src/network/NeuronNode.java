@@ -9,9 +9,9 @@ public class NeuronNode{
     }
     private NODE_TYPE nodeType;
     // default type
-    private SIGMOID_FUNCTION_TYPE sigmoidFunctionType = SIGMOID_FUNCTION_TYPE.logFunction;
+    private SIGMOID_FUNCTION_TYPE sigmoidFunctionType = SIGMOID_FUNCTION_TYPE.tanFunction;
 
-    public int layerNo;
+//    public int layerNo;
     private double forwardInputValue;
     private double forwardOutputValue;
     private double backwardInputValue;
@@ -68,6 +68,7 @@ public class NeuronNode{
             case HIDDEN:
             case OUTPUT: {
                 this.forwardOutputValue = sigmoidProject(forwardInputValue);
+                break;
             }
         }
     }
@@ -91,6 +92,7 @@ public class NeuronNode{
             case HIDDEN:
             case OUTPUT: {
                 this.backwardOutputValue = sigmoidDerivative(backwardInputValue);
+                break;
             }
         }
     }
