@@ -8,6 +8,17 @@ public class DataNode {
         this.output = output;
     }
 
+    public DataNode(int[] tempInput, int[] tempOutput) {
+        input = new double[tempInput.length];
+        for (int i = 0; i < tempInput.length; i++) {
+            input[i] = tempInput[i];
+        }
+        output = new double[tempOutput.length];
+        for (int i = 0; i < tempOutput.length; i++) {
+            output[i] = tempOutput[i];
+        }
+    }
+
     public double[] getInput() {
         return input;
     }

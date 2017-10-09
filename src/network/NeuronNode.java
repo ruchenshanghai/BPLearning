@@ -33,16 +33,16 @@ public class NeuronNode{
         }
         return 0;
     }
-    private double sigmoidDerivative(double delta) {
+    private double sigmoidDerivative(double inputValue) {
         switch (sigmoidFunctionType) {
             case logFunction: {
                 double result = 1 - forwardOutputValue;
-                result = forwardOutputValue * result * delta;
+                result = forwardOutputValue * result * inputValue;
                 return result;
             }
             case tanFunction: {
                 double temp = 1 - Math.pow(forwardOutputValue, 2);
-                double result = temp * delta;
+                double result = temp * inputValue;
                 return result;
             }
         }
@@ -72,7 +72,6 @@ public class NeuronNode{
             }
         }
     }
-
     public double getBackwardInputValue() {
         return backwardInputValue;
     }
