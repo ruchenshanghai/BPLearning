@@ -126,88 +126,151 @@ public class Main {
 
     private static void testClassification(int trainingTime, double trainingPercent, NeuronNode.SIGMOID_FUNCTION_TYPE sigmoidFunctionType) throws IOException {
 
-        int[] hiddenArray;
+        int[] hiddenArray = {90, 74};
         double rating = 1.05;
         int inputCount = imageWidth * imageHeight;
         int outputCount = classificationType;
-        int[][] hiddenArraySample = new int[][]{{90, 74}, {94, 72}, {94, 73}, {91, 74}, {93, 73}};
 
-
-        for (int hiddenInex = 0; hiddenInex < hiddenArraySample.length; hiddenInex++) {
-            hiddenArray = hiddenArraySample[hiddenInex];
-            NeuronSystem classificationSystem = new NeuronSystem(inputCount, hiddenArray, outputCount, rating, sigmoidFunctionType);
-            double verifyAccurateSum = 0;
-            double minAccurate = 1;
-
-            for (int verifyTimes = 0; verifyTimes < 20; verifyTimes++) {
-                classificationSystem.paramsReset();
-                // get data
-                ArrayList<DataNode> trainingList = new ArrayList<>();
-                ArrayList<DataNode> verifyList = new ArrayList<>();
-                for (int typeIndex = 0; typeIndex < classificationType; typeIndex++) {
-                    File tempFile = new File(classificationPath + "/" + (typeIndex + 1));
-                    int tempFileNum = tempFile.list().length;
-                    ArrayList<DataNode> tempList = new ArrayList<>();
-                    for (int fileIndex = 0; fileIndex < tempFileNum; fileIndex++) {
-                        BMPResolver resolver = new BMPResolver(imageWidth, imageHeight, classificationPath + "/" + (typeIndex + 1) + "/" + fileIndex + ".bmp");
-                        int[] tempInput = resolver.getInputVector();
-                        int[] tempOutput = new int[classificationType];
-                        for (int i = 0; i < classificationType; i++) {
-                            if (i == typeIndex) {
-                                tempOutput[i] = 1;
-                            } else {
-                                tempOutput[i] = 0;
-                            }
-                        }
-                        DataNode tempNode = new DataNode(tempInput, tempOutput);
-                        tempList.add(tempNode);
+        NeuronSystem classificationSystem = new NeuronSystem(inputCount, hiddenArray, outputCount, rating, sigmoidFunctionType);
+        classificationSystem.paramsReset();
+        // get data
+        ArrayList<DataNode> trainingList = new ArrayList<>();
+        ArrayList<DataNode> verifyList = new ArrayList<>();
+        for (int typeIndex = 0; typeIndex < classificationType; typeIndex++) {
+            File tempFile = new File(classificationPath + "/" + (typeIndex + 1));
+            int tempFileNum = tempFile.list().length;
+            ArrayList<DataNode> tempList = new ArrayList<>();
+            for (int fileIndex = 0; fileIndex < tempFileNum; fileIndex++) {
+                BMPResolver resolver = new BMPResolver(imageWidth, imageHeight, classificationPath + "/" + (typeIndex + 1) + "/" + fileIndex + ".bmp");
+                int[] tempInput = resolver.getInputVector();
+                int[] tempOutput = new int[classificationType];
+                for (int i = 0; i < classificationType; i++) {
+                    if (i == typeIndex) {
+                        tempOutput[i] = 1;
+                    } else {
+                        tempOutput[i] = 0;
                     }
-
-                    // divide data
-                    Collections.shuffle(tempList);
-                    int tempLength = tempList.size();
-                    int tempTrainingLength = (int) (tempLength * trainingPercent);
-                    for (int tempIndex = 0; tempIndex < tempLength; tempIndex++) {
-                        if (tempIndex < tempTrainingLength) {
-                            trainingList.add(tempList.get(tempIndex));
-                        } else {
-                            verifyList.add(tempList.get(tempIndex));
-                        }
-                    }
-
                 }
-
-                // training
-                int dataSize = trainingList.size();
-                double accurateTimes = 0;
-                for (int i = 0; i < trainingTime; i++) {
-                    accurateTimes = 0;
-                    for (int j = 0; j < dataSize; j++) {
-                        accurateTimes += classificationSystem.trainClassification(trainingList.get(j).getInput(), trainingList.get(j).getOutput());
-                    }
-                    Collections.shuffle(trainingList);
-//                    System.out.println("index: " + i + ", rate: " + (accurateTimes / dataSize));
-                }
-
-                // verify
-                int verifySize = verifyList.size();
-                accurateTimes = 0;
-                Collections.shuffle(verifyList);
-                for (int i = 0; i < verifySize; i++) {
-                    accurateTimes += classificationSystem.predictClassification(verifyList.get(i).getInput(), verifyList.get(i).getOutput());
-                }
-                System.out.printf("\t%5.4f", (accurateTimes / verifySize));
-
-                if ((accurateTimes / verifySize) < minAccurate) {
-                    minAccurate = (accurateTimes / verifySize);
-                }
-                verifyAccurateSum += (accurateTimes / verifySize);
+                DataNode tempNode = new DataNode(tempInput, tempOutput);
+                tempList.add(tempNode);
             }
-            System.out.println();
-            System.out.println("hidden layer structure: " + Arrays.toString(hiddenArray) + ", rating: " + rating);
-            System.out.println("min average predict accurate rate: " + minAccurate);
-            System.out.println("total average predict accurate rate: " + (verifyAccurateSum / 20));
+
+            // divide data
+            Collections.shuffle(tempList);
+            int tempLength = tempList.size();
+            int tempTrainingLength = (int) (tempLength * trainingPercent);
+            for (int tempIndex = 0; tempIndex < tempLength; tempIndex++) {
+                if (tempIndex < tempTrainingLength) {
+                    trainingList.add(tempList.get(tempIndex));
+                } else {
+                    verifyList.add(tempList.get(tempIndex));
+                }
+            }
+
         }
+
+        // training
+        int dataSize = trainingList.size();
+        double accurateTimes = 0;
+        for (int i = 0; i < trainingTime; i++) {
+            accurateTimes = 0;
+            for (int j = 0; j < dataSize; j++) {
+                accurateTimes += classificationSystem.trainClassification(trainingList.get(j).getInput(), trainingList.get(j).getOutput());
+            }
+            Collections.shuffle(trainingList);
+            System.out.println("index: " + i + ", accurate rate: " + (accurateTimes / dataSize));
+        }
+
+        // verify
+        int verifySize = verifyList.size();
+        accurateTimes = 0;
+        Collections.shuffle(verifyList);
+        for (int i = 0; i < verifySize; i++) {
+            accurateTimes += classificationSystem.predictClassification(verifyList.get(i).getInput(), verifyList.get(i).getOutput());
+        }
+
+        System.out.println("hidden layer structure: " + Arrays.toString(hiddenArray) + ", rating: " + rating);
+        System.out.println("average predict accurate rate: " + (accurateTimes / verifySize));
+
+
+//
+//        int[][] hiddenArraySample = new int[][]{{90, 74}, {94, 72}, {94, 73}, {91, 74}, {93, 73}};
+//
+//        for (int hiddenInex = 0; hiddenInex < hiddenArraySample.length; hiddenInex++) {
+//            hiddenArray = hiddenArraySample[hiddenInex];
+//            NeuronSystem classificationSystem = new NeuronSystem(inputCount, hiddenArray, outputCount, rating, sigmoidFunctionType);
+//            double verifyAccurateSum = 0;
+//            double minAccurate = 1;
+//
+//            for (int verifyTimes = 0; verifyTimes < 20; verifyTimes++) {
+//                classificationSystem.paramsReset();
+//                // get data
+//                ArrayList<DataNode> trainingList = new ArrayList<>();
+//                ArrayList<DataNode> verifyList = new ArrayList<>();
+//                for (int typeIndex = 0; typeIndex < classificationType; typeIndex++) {
+//                    File tempFile = new File(classificationPath + "/" + (typeIndex + 1));
+//                    int tempFileNum = tempFile.list().length;
+//                    ArrayList<DataNode> tempList = new ArrayList<>();
+//                    for (int fileIndex = 0; fileIndex < tempFileNum; fileIndex++) {
+//                        BMPResolver resolver = new BMPResolver(imageWidth, imageHeight, classificationPath + "/" + (typeIndex + 1) + "/" + fileIndex + ".bmp");
+//                        int[] tempInput = resolver.getInputVector();
+//                        int[] tempOutput = new int[classificationType];
+//                        for (int i = 0; i < classificationType; i++) {
+//                            if (i == typeIndex) {
+//                                tempOutput[i] = 1;
+//                            } else {
+//                                tempOutput[i] = 0;
+//                            }
+//                        }
+//                        DataNode tempNode = new DataNode(tempInput, tempOutput);
+//                        tempList.add(tempNode);
+//                    }
+//
+//                    // divide data
+//                    Collections.shuffle(tempList);
+//                    int tempLength = tempList.size();
+//                    int tempTrainingLength = (int) (tempLength * trainingPercent);
+//                    for (int tempIndex = 0; tempIndex < tempLength; tempIndex++) {
+//                        if (tempIndex < tempTrainingLength) {
+//                            trainingList.add(tempList.get(tempIndex));
+//                        } else {
+//                            verifyList.add(tempList.get(tempIndex));
+//                        }
+//                    }
+//
+//                }
+//
+//                // training
+//                int dataSize = trainingList.size();
+//                double accurateTimes = 0;
+//                for (int i = 0; i < trainingTime; i++) {
+//                    accurateTimes = 0;
+//                    for (int j = 0; j < dataSize; j++) {
+//                        accurateTimes += classificationSystem.trainClassification(trainingList.get(j).getInput(), trainingList.get(j).getOutput());
+//                    }
+//                    Collections.shuffle(trainingList);
+////                    System.out.println("index: " + i + ", rate: " + (accurateTimes / dataSize));
+//                }
+//
+//                // verify
+//                int verifySize = verifyList.size();
+//                accurateTimes = 0;
+//                Collections.shuffle(verifyList);
+//                for (int i = 0; i < verifySize; i++) {
+//                    accurateTimes += classificationSystem.predictClassification(verifyList.get(i).getInput(), verifyList.get(i).getOutput());
+//                }
+//                System.out.printf("\t%5.4f", (accurateTimes / verifySize));
+//
+//                if ((accurateTimes / verifySize) < minAccurate) {
+//                    minAccurate = (accurateTimes / verifySize);
+//                }
+//                verifyAccurateSum += (accurateTimes / verifySize);
+//            }
+//            System.out.println();
+//            System.out.println("hidden layer structure: " + Arrays.toString(hiddenArray) + ", rating: " + rating);
+//            System.out.println("min average predict accurate rate: " + minAccurate);
+//            System.out.println("total average predict accurate rate: " + (verifyAccurateSum / 20));
+//        }
 
     }
 
