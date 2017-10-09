@@ -124,7 +124,7 @@ public class Main {
 
     }
 
-    private static void testClassification(int trainingTime, double trainingPercent, NeuronNode.SIGMOID_FUNCTION_TYPE sigmoidFunctionType) throws IOException {
+    private static void testClassification(int trainingTimes, double trainingPercent, NeuronNode.SIGMOID_FUNCTION_TYPE sigmoidFunctionType) throws IOException {
 
         int[] hiddenArray = {90, 74};
         double rating = 1.05;
@@ -172,7 +172,7 @@ public class Main {
         // training
         int dataSize = trainingList.size();
         double accurateTimes = 0;
-        for (int i = 0; i < trainingTime; i++) {
+        for (int i = 0; i < trainingTimes; i++) {
             accurateTimes = 0;
             for (int j = 0; j < dataSize; j++) {
                 accurateTimes += classificationSystem.trainClassification(trainingList.get(j).getInput(), trainingList.get(j).getOutput());
