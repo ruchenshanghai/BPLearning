@@ -269,4 +269,19 @@ public class NeuronSystem {
         }
     }
 
+    public int predictClassification(double[] input) {
+        forward(input);
+        int maxOutputIndex = 0;
+        double maxOutputValue = 0;
+        int maxExpectIndex = 0;
+        double maxEcpectVlaue = 0;
+        for (int i = 0; i < outputCount; i++) {
+            if (outputNodes[i].getForwardOutputValue() > maxOutputValue) {
+                maxOutputIndex = i;
+                maxOutputValue = outputNodes[i].getForwardOutputValue();
+            }
+        }
+        return maxOutputIndex + 1;
+    }
+
 }

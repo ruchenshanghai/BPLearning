@@ -44,8 +44,8 @@ public class BMPResolver {
 //        }
     }
 
-    public int[] getInputVector() {
-        int[] tempResult = new int[height * width];
+    public double[] getInputVector() {
+        double[] tempResult = new double[height * width];
         int index = 0;
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
